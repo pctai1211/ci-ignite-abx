@@ -193,37 +193,4 @@ class PanelFields
 		);
 	}
 
-	public static function categories()
-	{
-		return array(
-			'bacteria'   => 'Bacteria',
-			'fungi'      => 'Fungi',
-			'resistance' => 'Resistance Genes',
-			'viral'      => 'Viral',
-		);
-	}
-
-	public static function default_targets()
-	{
-		return array(
-			'bacteria' => array(
-				array('name' => 'E. coli', 'vlow' => '18', 'low' => '22', 'normal' => '28', 'high' => '33', 'vhigh' => '38', 'enabled' => 1),
-				array('name' => 'Klebsiella pneumoniae', 'vlow' => '19', 'low' => '23', 'normal' => '29', 'high' => '34', 'vhigh' => '39', 'enabled' => 1),
-				array('name' => 'Proteus mirabilis', 'vlow' => '20', 'low' => '24', 'normal' => '30', 'high' => '35', 'vhigh' => '40', 'enabled' => 1),
-				array('name' => 'Enterococcus faecalis', 'vlow' => '', 'low' => '', 'normal' => '', 'high' => '', 'vhigh' => '', 'enabled' => 0),
-			),
-			'fungi' => array(
-				array('name' => 'Candida albicans', 'vlow' => '21', 'low' => '25', 'normal' => '31', 'high' => '36', 'vhigh' => '', 'enabled' => 1),
-				array('name' => 'Candida glabrata', 'vlow' => '', 'low' => '', 'normal' => '', 'high' => '', 'vhigh' => '', 'enabled' => 0),
-			),
-			'resistance' => array(
-				array('name' => 'CTX-M', 'vlow' => '22', 'low' => '26', 'normal' => '32', 'high' => '37', 'vhigh' => '', 'enabled' => 1),
-				array('name' => 'KPC', 'vlow' => '', 'low' => '', 'normal' => '', 'high' => '', 'vhigh' => '', 'enabled' => 0),
-			),
-			'viral' => array(
-				array('name' => 'Influenza A', 'vlow' => '', 'low' => '', 'normal' => '', 'high' => '', 'vhigh' => '', 'enabled' => 0),
-				array('name' => 'SARS-CoV-2', 'vlow' => '', 'low' => '', 'normal' => '', 'high' => '', 'vhigh' => '', 'enabled' => 0),
-			),
-		);
-	}
 }

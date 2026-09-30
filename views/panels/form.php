@@ -9,8 +9,7 @@ use CI\IgniteAbx\Support\View;
 $group        = isset($group) ? $group : array();
 $lab_id       = isset($lab_id) ? (int) $lab_id : 0;
 $parents      = isset($parents) ? $parents : array();
-$tests_by_cat = isset($tests_by_cat) ? $tests_by_cat : array();
-$categories   = isset($categories) ? $categories : PanelFields::categories();
+$tests        = isset($tests) ? $tests : array();
 $options      = isset($group['tg_other_options']) && is_array($group['tg_other_options']) ? $group['tg_other_options'] : array();
 $qs           = Roles::is_admin() ? array('lab_id' => $lab_id) : array();
 $tab          = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'settings';
@@ -31,14 +30,15 @@ $opt = static function ($options, $key, $default = '') {
 	<input type="hidden" name="action" value="ci_abx_save_panel" />
 	<input type="hidden" name="lab_id" value="<?php echo esc_attr($lab_id); ?>" />
 	<input type="hidden" name="group[tg_ID]" value="<?php echo esc_attr($id); ?>" />
+	<?php if ($tab === 'tests') : ?><input type="hidden" name="return_tab" value="tests" /><?php endif; ?>
 
 	<div class="ci-form-actions-top">
 		<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-panels', $qs)); ?>"><?php esc_html_e('Cancel', 'ci-ignite-abx'); ?></a>
-		<button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save Panel', 'ci-ignite-abx'); ?></button>
+		<button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save Group', 'ci-ignite-abx'); ?></button>
 	</div>
 
 	<div class="ci-tabs">
-		<button type="button" class="ci-tab <?php echo $tab !== 'tests' ? 'is-active' : ''; ?>" data-tab="settings"><?php esc_html_e('Panel Settings', 'ci-ignite-abx'); ?></button>
+		<button type="button" class="ci-tab <?php echo $tab !== 'tests' ? 'is-active' : ''; ?>" data-tab="settings"><?php esc_html_e('Group Settings', 'ci-ignite-abx'); ?></button>
 		<button type="button" class="ci-tab <?php echo $tab === 'tests' ? 'is-active' : ''; ?>" data-tab="tests"><?php esc_html_e('Tests', 'ci-ignite-abx'); ?></button>
 	</div>
 
@@ -52,12 +52,12 @@ $opt = static function ($options, $key, $default = '') {
 		</div>
 
 		<div class="ci-card ci-subpanel" data-subpanel="basic" <?php echo $sub !== 'basic' ? 'hidden' : ''; ?>>
-			<h2><?php esc_html_e('Basic Information', 'ci-ignite-abx'); ?></h2>
-			<p class="ci-muted"><?php esc_html_e('Essential panel configuration details', 'ci-ignite-abx'); ?></p>
+			<h2><?php esc_html_e('Group Information', 'ci-ignite-abx'); ?></h2>
+			<p class="ci-muted"><?php esc_html_e('Set the group name, hierarchy, and availability.', 'ci-ignite-abx'); ?></p>
 			<div class="ci-grid-3">
 				<div>
-					<label><?php esc_html_e('Name', 'ci-ignite-abx'); ?> *</label>
-					<input type="text" name="group[tg_name]" required placeholder="<?php esc_attr_e('Enter panel name', 'ci-ignite-abx'); ?>" value="<?php echo esc_attr($val($group, 'tg_name')); ?>" />
+					<label><?php esc_html_e('Group Name', 'ci-ignite-abx'); ?> *</label>
+					<input type="text" name="group[tg_name]" required placeholder="<?php esc_attr_e('Enter group name', 'ci-ignite-abx'); ?>" value="<?php echo esc_attr($val($group, 'tg_name')); ?>" />
 				</div>
 				<div>
 					<label><?php esc_html_e('Short Name', 'ci-ignite-abx'); ?></label>
@@ -80,9 +80,9 @@ $opt = static function ($options, $key, $default = '') {
 					<input type="number" name="group[tg_position]" value="<?php echo esc_attr($val($group, 'tg_position', 0)); ?>" />
 				</div>
 				<div>
-					<label><?php esc_html_e('Parent', 'ci-ignite-abx'); ?></label>
+					<label><?php esc_html_e('Parent Group', 'ci-ignite-abx'); ?></label>
 					<select name="group[tg_parent]">
-						<option value="0"><?php esc_html_e('Select parent', 'ci-ignite-abx'); ?></option>
+						<option value="0"><?php esc_html_e('Top-level group', 'ci-ignite-abx'); ?></option>
 						<?php foreach ($parents as $parent) : ?>
 							<option value="<?php echo esc_attr($parent->tg_ID); ?>" <?php selected((int) $val($group, 'tg_parent'), (int) $parent->tg_ID); ?>>
 								<?php echo esc_html($parent->tg_name); ?>
@@ -91,7 +91,7 @@ $opt = static function ($options, $key, $default = '') {
 					</select>
 				</div>
 				<div>
-					<label><?php esc_html_e('Relate To', 'ci-ignite-abx'); ?></label>
+					<label><?php esc_html_e('Related Groups', 'ci-ignite-abx'); ?></label>
 					<select name="group[tg_relate_to][]" multiple class="ci-multiselect">
 						<?php foreach ($parents as $parent) : ?>
 							<option value="<?php echo esc_attr($parent->tg_ID); ?>" <?php echo in_array((string) $parent->tg_ID, $relate, true) ? 'selected' : ''; ?>>
@@ -130,7 +130,7 @@ $opt = static function ($options, $key, $default = '') {
 					<input type="text" name="group[tg_pdf_title]" value="<?php echo esc_attr($val($group, 'tg_pdf_title')); ?>" />
 				</div>
 				<div>
-					<label><?php esc_html_e('Panel Title (PDF)', 'ci-ignite-abx'); ?></label>
+					<label><?php esc_html_e('Group Title (PDF)', 'ci-ignite-abx'); ?></label>
 					<input type="text" name="group[tg_other_options][panel_pdf_title]" value="<?php echo esc_attr($opt($options, 'panel_pdf_title')); ?>" />
 				</div>
 			</div>
@@ -150,7 +150,7 @@ $opt = static function ($options, $key, $default = '') {
 					<?php endif; ?>
 				</div>
 			</div>
-			<label><?php esc_html_e('If this panel is chosen then show this comment', 'ci-ignite-abx'); ?></label>
+			<label><?php esc_html_e('Show this comment when the group is chosen', 'ci-ignite-abx'); ?></label>
 			<textarea name="group[tg_comments]" rows="3"><?php echo esc_textarea($val($group, 'tg_comments')); ?></textarea>
 			<div class="ci-grid-2">
 				<div>
@@ -182,12 +182,12 @@ $opt = static function ($options, $key, $default = '') {
 
 		<div class="ci-card ci-subpanel" data-subpanel="clinic" <?php echo $sub !== 'clinic' ? 'hidden' : ''; ?>>
 			<h2><?php esc_html_e('Clinic Access Control', 'ci-ignite-abx'); ?></h2>
-			<p class="ci-muted"><?php esc_html_e('Select which clinics can access this test panel', 'ci-ignite-abx'); ?></p>
+			<p class="ci-muted"><?php esc_html_e('Select which clinics can access this group and its tests.', 'ci-ignite-abx'); ?></p>
 			<label><?php esc_html_e('Available Clinics', 'ci-ignite-abx'); ?></label>
 			<input type="text" name="group[tg_show_cli_IDs]" value="<?php echo esc_attr($val($group, 'tg_show_cli_IDs')); ?>" placeholder="<?php esc_attr_e('Select clinics… comma-separated codes', 'ci-ignite-abx'); ?>" />
 			<div class="ci-info">
 				<strong><?php esc_html_e('Access Summary', 'ci-ignite-abx'); ?></strong>
-				<p><?php echo empty($group['tg_show_cli_IDs']) ? esc_html__('No clinics selected – panel will not be accessible', 'ci-ignite-abx') : esc_html($group['tg_show_cli_IDs']); ?></p>
+				<p><?php echo empty($group['tg_show_cli_IDs']) ? esc_html__('No clinics selected – this group will not be accessible', 'ci-ignite-abx') : esc_html($group['tg_show_cli_IDs']); ?></p>
 			</div>
 			<label class="ci-check">
 				<input type="hidden" name="group[tg_other_options][auto_approve_clinics]" value="0" />
@@ -197,7 +197,7 @@ $opt = static function ($options, $key, $default = '') {
 			<label class="ci-check">
 				<input type="hidden" name="group[tg_other_options][notify_lab_on_order]" value="0" />
 				<input type="checkbox" name="group[tg_other_options][notify_lab_on_order]" value="1" <?php checked(!isset($options['notify_lab_on_order']) || $options['notify_lab_on_order']); ?> />
-				<?php esc_html_e('Notify lab when panel is ordered', 'ci-ignite-abx'); ?>
+				<?php esc_html_e('Notify lab when a test in this group is ordered', 'ci-ignite-abx'); ?>
 			</label>
 		</div>
 
@@ -231,7 +231,7 @@ $opt = static function ($options, $key, $default = '') {
 
 		<div class="ci-card ci-subpanel" data-subpanel="display" <?php echo $sub !== 'display' ? 'hidden' : ''; ?>>
 			<h2><?php esc_html_e('Display Options', 'ci-ignite-abx'); ?></h2>
-			<p class="ci-muted"><?php esc_html_e('Configure panel display and behavior settings', 'ci-ignite-abx'); ?></p>
+			<p class="ci-muted"><?php esc_html_e('Configure group display and behavior settings.', 'ci-ignite-abx'); ?></p>
 			<div class="ci-check-grid">
 				<?php foreach (PanelFields::display_options() as $key => $meta) : ?>
 					<?php
@@ -271,49 +271,30 @@ $opt = static function ($options, $key, $default = '') {
 
 	<div class="ci-tab-panel" data-panel="tests" <?php echo $tab === 'tests' ? '' : 'hidden'; ?>>
 		<div class="ci-section-head">
-			<p class="ci-muted"><?php esc_html_e('CT values apply to all clinics', 'ci-ignite-abx'); ?></p>
-			<button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save CT Values', 'ci-ignite-abx'); ?></button>
+			<div><h2><?php esc_html_e('Tests in this group', 'ci-ignite-abx'); ?></h2><p class="ci-muted"><?php echo empty($group['tg_parent']) ? esc_html__('Includes tests from this parent group and its child groups. New tests are added to the parent group.', 'ci-ignite-abx') : esc_html__('Tests saved here belong to this group. Add a row to create a test.', 'ci-ignite-abx'); ?></p></div>
+			<button type="button" class="ci-btn ci-btn-ghost" id="ci-add-test-row" data-group-id="<?php echo esc_attr($group['tg_ID']); ?>" data-group-name="<?php echo esc_attr($group['tg_name']); ?>"><?php esc_html_e('+ Add Test', 'ci-ignite-abx'); ?></button>
 		</div>
-		<?php foreach ($categories as $cat_key => $cat_label) : ?>
-			<?php $rows = isset($tests_by_cat[$cat_key]) ? $tests_by_cat[$cat_key] : array(); ?>
-			<section class="ci-card">
-				<div class="ci-section-head">
-					<h2><?php echo esc_html($cat_label); ?></h2>
-					<span class="ci-muted"><?php echo esc_html(count($rows) . ' targets'); ?></span>
-				</div>
-				<table class="ci-table ci-ct-table">
-					<thead>
-						<tr>
-							<th><?php esc_html_e('Target', 'ci-ignite-abx'); ?></th>
-							<th>V.Low</th>
-							<th>Low</th>
-							<th>Normal</th>
-							<th>High</th>
-							<th>V.High</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ($rows as $i => $test) : ?>
-							<tr>
-								<td>
-									<input type="hidden" name="tests[<?php echo esc_attr($cat_key); ?>][<?php echo (int) $i; ?>][te_ID]" value="<?php echo esc_attr($test['te_ID'] ?? 0); ?>" />
-									<input type="hidden" name="tests[<?php echo esc_attr($cat_key); ?>][<?php echo (int) $i; ?>][te_name]" value="<?php echo esc_attr($test['te_name']); ?>" />
-									<label class="ci-check">
-										<input type="hidden" name="tests[<?php echo esc_attr($cat_key); ?>][<?php echo (int) $i; ?>][te_enabled]" value="0" />
-										<input type="checkbox" name="tests[<?php echo esc_attr($cat_key); ?>][<?php echo (int) $i; ?>][te_enabled]" value="1" <?php checked(!empty($test['te_enabled'])); ?> />
-										<?php echo esc_html($test['te_name']); ?>
-									</label>
-								</td>
-								<?php foreach (array('vlow', 'low', 'normal', 'high', 'vhigh') as $band) : ?>
-									<td>
-										<input type="text" class="ci-ct" name="tests[<?php echo esc_attr($cat_key); ?>][<?php echo (int) $i; ?>][te_ct_<?php echo esc_attr($band); ?>]" value="<?php echo esc_attr($test['te_ct_' . $band] ?? ''); ?>" />
-									</td>
-								<?php endforeach; ?>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-			</section>
-		<?php endforeach; ?>
+		<div class="ci-card tw-overflow-x-auto">
+			<table class="ci-table ci-test-table">
+				<thead><tr>
+					<th><?php esc_html_e('Test Name', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Group', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Abbreviation', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Category', 'ci-ignite-abx'); ?></th>
+					<th>V.Low</th><th>Low</th><th>Normal</th><th>High</th><th>V.High</th><th><?php esc_html_e('Enabled', 'ci-ignite-abx'); ?></th>
+				</tr></thead>
+				<tbody id="ci-test-rows">
+				<?php foreach ($tests as $i => $test) : ?>
+					<tr>
+						<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_ID]" value="<?php echo esc_attr($test['te_ID']); ?>" /><input type="hidden" name="tests[<?php echo (int) $i; ?>][tg_group_id]" value="<?php echo esc_attr($test['tg_group_id']); ?>" /><input type="text" name="tests[<?php echo (int) $i; ?>][te_name]" value="<?php echo esc_attr($test['te_name']); ?>" /></td>
+						<td><?php echo esc_html($test['tg_group_name']); ?></td>
+						<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_abrev]" value="<?php echo esc_attr($test['te_abrev']); ?>" /></td>
+						<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_category]" value="<?php echo esc_attr($test['te_category']); ?>" /></td>
+						<?php foreach (array('vlow', 'low', 'normal', 'high', 'vhigh') as $band) : ?><td><input type="text" class="ci-ct" name="tests[<?php echo (int) $i; ?>][te_ct_<?php echo esc_attr($band); ?>]" value="<?php echo esc_attr($test['te_ct_' . $band]); ?>" /></td><?php endforeach; ?>
+						<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="0" /><input type="checkbox" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="1" <?php checked(!empty($test['te_enabled'])); ?> aria-label="<?php esc_attr_e('Enable test', 'ci-ignite-abx'); ?>" /></td>
+					</tr>
+				<?php endforeach; ?>
+				<?php if (empty($tests)) : ?><tr class="ci-test-empty"><td colspan="10" class="ci-empty"><?php esc_html_e('This group has no tests yet.', 'ci-ignite-abx'); ?></td></tr><?php endif; ?>
+				</tbody>
+			</table>
+		</div>
+		<p><button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save Tests', 'ci-ignite-abx'); ?></button></p>
 	</div>
 </form>

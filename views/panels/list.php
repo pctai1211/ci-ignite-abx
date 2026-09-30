@@ -2,14 +2,11 @@
 
 defined('ABSPATH') || exit;
 
-use CI\IgniteAbx\Config\PanelFields;
 use CI\IgniteAbx\Security\Roles;
 use CI\IgniteAbx\Support\View;
 
 $lab_id = isset($lab_id) ? (int) $lab_id : 0;
-$stats  = isset($stats) ? $stats : array('active_tests' => 0, 'configured' => 0, 'pending' => 0);
 $panels = isset($panels) ? $panels : array();
-$cats   = PanelFields::categories();
 $qs     = Roles::is_admin() ? array('lab_id' => $lab_id) : array();
 ?>
 <div class="ci-abx-toolbar">
@@ -17,91 +14,91 @@ $qs     = Roles::is_admin() ? array('lab_id' => $lab_id) : array();
 		<?php wp_nonce_field('ci_abx_export_panels', 'ci_abx_nonce'); ?>
 		<input type="hidden" name="action" value="ci_abx_export_panels" />
 		<input type="hidden" name="lab_id" value="<?php echo esc_attr($lab_id); ?>" />
-		<button class="ci-btn ci-btn-ghost" type="submit"><?php esc_html_e('Export All', 'ci-ignite-abx'); ?></button>
+		<button class="ci-btn ci-btn-ghost" type="submit"><?php esc_html_e('Export JSON', 'ci-ignite-abx'); ?></button>
+	</form>
+	<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+		<?php wp_nonce_field('ci_abx_export_panels', 'ci_abx_nonce'); ?>
+		<input type="hidden" name="action" value="ci_abx_export_panels_csv" />
+		<input type="hidden" name="lab_id" value="<?php echo esc_attr($lab_id); ?>" />
+		<button class="ci-btn ci-btn-ghost" type="submit"><?php esc_html_e('Export CSV', 'ci-ignite-abx'); ?></button>
+		<button class="ci-btn ci-btn-ghost" type="submit" name="template" value="1"><?php esc_html_e('CSV Template', 'ci-ignite-abx'); ?></button>
 	</form>
 	<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" class="ci-import-form">
 		<?php wp_nonce_field('ci_abx_import_panels', 'ci_abx_nonce'); ?>
 		<input type="hidden" name="action" value="ci_abx_import_panels" />
 		<input type="hidden" name="lab_id" value="<?php echo esc_attr($lab_id); ?>" />
+		<select class="ci-import-mode" name="import_mode" aria-label="<?php esc_attr_e('Import mode', 'ci-ignite-abx'); ?>">
+			<option value="create_update"><?php esc_html_e('Create & Update', 'ci-ignite-abx'); ?></option>
+			<option value="create_merge"><?php esc_html_e('Create & Merge', 'ci-ignite-abx'); ?></option>
+			<option value="update_only"><?php esc_html_e('Update Only', 'ci-ignite-abx'); ?></option>
+		</select>
 		<label class="ci-btn ci-btn-ghost">
-			<?php esc_html_e('Import Settings', 'ci-ignite-abx'); ?>
-			<input type="file" name="import_file" accept="application/json" onchange="this.form.submit()" hidden />
+			<?php esc_html_e('Choose JSON/CSV', 'ci-ignite-abx'); ?>
+			<input type="file" name="import_file" accept=".json,.csv,application/json,text/csv" required hidden />
 		</label>
+		<button class="ci-btn ci-btn-primary" type="submit"><?php esc_html_e('Import', 'ci-ignite-abx'); ?></button>
 	</form>
-</div>
-
-<div class="ci-pill-row">
-	<span class="ci-pill ci-pill-active"><?php esc_html_e('PCR', 'ci-ignite-abx'); ?></span>
-</div>
-
-<div class="ci-section-head">
-	<h2><?php echo esc_html(sprintf(__('Panels %d', 'ci-ignite-abx'), count($panels))); ?></h2>
-	<a class="ci-btn ci-btn-primary" href="<?php echo esc_url(View::url('ci-abx-panels', $qs + array('act' => 'add'))); ?>"><?php esc_html_e('+ New Panel', 'ci-ignite-abx'); ?></a>
-</div>
-
-<div class="ci-panel-grid">
-	<?php if (empty($panels)) : ?>
-		<div class="ci-card ci-empty-card"><?php esc_html_e('No panels yet. Create your first PCR panel.', 'ci-ignite-abx'); ?></div>
-	<?php endif; ?>
-	<?php foreach ($panels as $panel) : ?>
-		<?php
-		$active = !empty($panel['tg_show_req']);
-		$edit   = View::url('ci-abx-panels', $qs + array('act' => 'edit', 'id' => $panel['tg_ID']));
-		?>
-		<article class="ci-card ci-panel-card">
-			<div class="ci-panel-card__top">
-				<div>
-					<h3><a href="<?php echo esc_url($edit); ?>"><?php echo esc_html($panel['tg_name']); ?></a></h3>
-					<div class="ci-chip-row">
-						<span class="ci-chip"><?php esc_html_e('PCR', 'ci-ignite-abx'); ?></span>
-						<span class="ci-badge <?php echo $active ? 'ci-badge-green' : 'ci-badge-yellow'; ?>">
-							<?php echo $active ? esc_html__('Active', 'ci-ignite-abx') : esc_html__('Draft', 'ci-ignite-abx'); ?>
-						</span>
-					</div>
-				</div>
-				<a class="ci-icon-btn" href="<?php echo esc_url($edit); ?>" aria-label="<?php esc_attr_e('Edit', 'ci-ignite-abx'); ?>">✎</a>
-			</div>
-			<p class="ci-muted">
-				<?php
-				$bits = array();
-				foreach ($cats as $key => $label) {
-					$count = isset($panel['categories'][$key]['enabled']) ? (int) $panel['categories'][$key]['enabled'] : 0;
-					if ($count) {
-						$bits[] = $label . ' ' . $count;
-					}
-				}
-				echo esc_html($bits ? implode('  ·  ', $bits) : __('No targets enabled', 'ci-ignite-abx'));
-				?>
-			</p>
-			<p class="ci-muted"><?php echo esc_html($panel['tg_comments'] ? wp_trim_words($panel['tg_comments'], 12) : ''); ?></p>
-			<details class="ci-targets">
-				<summary><?php esc_html_e('Show targets', 'ci-ignite-abx'); ?></summary>
-				<ul>
-					<?php foreach ($panel['tests'] as $test) : ?>
-						<?php if (empty($test['te_enabled'])) { continue; } ?>
-						<li><?php echo esc_html($test['te_name']); ?></li>
-					<?php endforeach; ?>
-				</ul>
-			</details>
-		</article>
-	<?php endforeach; ?>
+	<a class="ci-btn ci-btn-primary" href="<?php echo esc_url(View::url('ci-abx-panels', $qs + array('act' => 'add'))); ?>"><?php esc_html_e('+ New Group', 'ci-ignite-abx'); ?></a>
 </div>
 
 <section class="ci-card">
-	<h2><?php esc_html_e('Tests · PCR', 'ci-ignite-abx'); ?></h2>
-	<p class="ci-muted"><?php esc_html_e('Create and configure laboratory tests', 'ci-ignite-abx'); ?></p>
-	<div class="ci-stat-grid">
-		<div class="ci-stat ci-stat-blue">
-			<div><?php esc_html_e('Active Tests', 'ci-ignite-abx'); ?></div>
-			<strong><?php echo esc_html((string) $stats['active_tests']); ?></strong>
+	<div class="ci-section-head">
+		<div>
+			<h2><?php esc_html_e('Groups', 'ci-ignite-abx'); ?></h2>
+			<p class="ci-muted"><?php esc_html_e('Parent groups contain child groups; each group owns its tests.', 'ci-ignite-abx'); ?></p>
 		</div>
-		<div class="ci-stat ci-stat-green">
-			<div><?php esc_html_e('Configured', 'ci-ignite-abx'); ?></div>
-			<strong><?php echo esc_html((string) $stats['configured']); ?></strong>
-		</div>
-		<div class="ci-stat ci-stat-orange">
-			<div><?php esc_html_e('Pending', 'ci-ignite-abx'); ?></div>
-			<strong><?php echo esc_html((string) $stats['pending']); ?></strong>
-		</div>
+		<span class="ci-badge ci-badge-gray"><?php echo esc_html((string) count($panels)); ?> <?php esc_html_e('parent groups', 'ci-ignite-abx'); ?></span>
+	</div>
+	<div class="tw-overflow-x-auto">
+		<table class="ci-table">
+			<thead><tr>
+				<th><?php esc_html_e('Group', 'ci-ignite-abx'); ?></th>
+				<th><?php esc_html_e('Parent', 'ci-ignite-abx'); ?></th>
+				<th><?php esc_html_e('Tests', 'ci-ignite-abx'); ?></th>
+				<th><?php esc_html_e('Status', 'ci-ignite-abx'); ?></th>
+				<th><?php esc_html_e('Actions', 'ci-ignite-abx'); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php if (empty($panels)) : ?>
+				<tr><td colspan="5" class="ci-empty"><?php esc_html_e('No groups yet. Create a parent group to get started.', 'ci-ignite-abx'); ?></td></tr>
+			<?php endif; ?>
+			<?php foreach ($panels as $group) : ?>
+				<?php
+				$edit_url  = View::url('ci-abx-panels', $qs + array('act' => 'edit', 'id' => $group['tg_ID']));
+				$tests_url = View::url('ci-abx-panels', $qs + array('act' => 'edit', 'id' => $group['tg_ID'], 'tab' => 'tests'));
+				$child_url = View::url('ci-abx-panels', $qs + array('act' => 'add', 'parent' => $group['tg_ID']));
+				$group_tests = isset($group['tests']) ? count($group['tests']) : 0;
+				foreach ($group['children'] as $child_group) {
+					$group_tests += isset($child_group['tests']) ? count($child_group['tests']) : 0;
+				}
+				?>
+				<tr class="ci-group-table__parent">
+					<td><strong><?php echo esc_html($group['tg_name']); ?></strong><span class="ci-muted"><?php esc_html_e('Parent group', 'ci-ignite-abx'); ?></span></td>
+					<td>—</td>
+					<td><a href="<?php echo esc_url($tests_url); ?>"><?php echo esc_html((string) $group_tests); ?></a></td>
+					<td><span class="ci-badge <?php echo !empty($group['tg_show_req']) ? 'ci-badge-green' : 'ci-badge-gray'; ?>"><?php echo !empty($group['tg_show_req']) ? esc_html__('Active', 'ci-ignite-abx') : esc_html__('Inactive', 'ci-ignite-abx'); ?></span></td>
+					<td class="ci-table-actions">
+						<a href="<?php echo esc_url($tests_url); ?>"><?php esc_html_e('Manage Tests', 'ci-ignite-abx'); ?></a>
+						<a href="<?php echo esc_url($edit_url); ?>"><?php esc_html_e('Edit Group', 'ci-ignite-abx'); ?></a>
+						<a href="<?php echo esc_url($child_url); ?>"><?php esc_html_e('Add Child', 'ci-ignite-abx'); ?></a>
+					</td>
+				</tr>
+				<?php foreach ($group['children'] as $child) : ?>
+					<?php
+					$child_edit_url  = View::url('ci-abx-panels', $qs + array('act' => 'edit', 'id' => $child['tg_ID']));
+					$child_tests_url = View::url('ci-abx-panels', $qs + array('act' => 'edit', 'id' => $child['tg_ID'], 'tab' => 'tests'));
+					$child_tests     = isset($child['tests']) ? count($child['tests']) : 0;
+					?>
+					<tr>
+						<td><span class="ci-group-table__indent">↳</span><?php echo esc_html($child['tg_name']); ?></td>
+						<td><?php echo esc_html($group['tg_name']); ?></td>
+						<td><a href="<?php echo esc_url($child_tests_url); ?>"><?php echo esc_html((string) $child_tests); ?></a></td>
+						<td><span class="ci-badge <?php echo !empty($child['tg_show_req']) ? 'ci-badge-green' : 'ci-badge-gray'; ?>"><?php echo !empty($child['tg_show_req']) ? esc_html__('Active', 'ci-ignite-abx') : esc_html__('Inactive', 'ci-ignite-abx'); ?></span></td>
+						<td class="ci-table-actions"><a href="<?php echo esc_url($child_tests_url); ?>"><?php esc_html_e('Manage Tests', 'ci-ignite-abx'); ?></a><a href="<?php echo esc_url($child_edit_url); ?>"><?php esc_html_e('Edit Group', 'ci-ignite-abx'); ?></a></td>
+					</tr>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 </section>

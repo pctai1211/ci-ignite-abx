@@ -10,8 +10,20 @@ class TestRepository extends Repository
 	{
 		return $this->db->get_results(
 			$this->db->prepare(
-				'SELECT * FROM ci_test_panels WHERE te_group_id = %d ORDER BY te_category ASC, te_position ASC, te_name ASC',
+				'SELECT * FROM ci_test_panels WHERE te_group_id = %d ORDER BY te_position ASC, te_name ASC',
 				$group_id
+			),
+			ARRAY_A
+		);
+	}
+
+	public function find_by_group_name($group_id, $name)
+	{
+		return $this->db->get_row(
+			$this->db->prepare(
+				'SELECT * FROM ci_test_panels WHERE te_group_id = %d AND te_name = %s LIMIT 1',
+				(int) $group_id,
+				$name
 			),
 			ARRAY_A
 		);
@@ -70,15 +82,29 @@ class TestRepository extends Repository
 			'te_abrev'     => sanitize_text_field($test['te_abrev'] ?? ''),
 			'te_group_id'  => (int) $group_id,
 			'te_category'  => sanitize_key($test['te_category'] ?? ''),
-			'te_ct_vlow'   => sanitize_text_field($test['te_ct_vlow'] ?? ''),
-			'te_ct_low'    => sanitize_text_field($test['te_ct_low'] ?? ''),
-			'te_ct_normal' => sanitize_text_field($test['te_ct_normal'] ?? ''),
-			'te_ct_high'   => sanitize_text_field($test['te_ct_high'] ?? ''),
-			'te_ct_vhigh'  => sanitize_text_field($test['te_ct_vhigh'] ?? ''),
-			'te_enabled'   => empty($test['te_enabled']) ? 0 : 1,
+			'te_ct_vlow'   => $test['te_ct_vlow'] ?? '',
+			'te_ct_low'    => $test['te_ct_low'] ?? '',
+			'te_ct_normal' => $test['te_ct_normal'] ?? '',
+			'te_ct_high'   => $test['te_ct_high'] ?? '',
+			'te_ct_vhigh'  => $test['te_ct_vhigh'] ?? '',
+			'te_enabled'   => array_key_exists('te_enabled', $test) && empty($test['te_enabled']) ? 0 : 1,
 			'te_position'  => isset($test['te_position']) ? absint($test['te_position']) : 0,
 			'te_modified'  => $now,
 		);
+		$optional_text = array('te_abrev2', 'te_loinc_code', 'te_units', 'te_range');
+		foreach ($optional_text as $key) {
+			if (array_key_exists($key, $test)) {
+				$data[$key] = sanitize_text_field($test[$key]);
+			}
+		}
+		if (array_key_exists('te_desc', $test)) {
+			$data['te_desc'] = sanitize_textarea_field($test['te_desc']);
+		}
+		foreach (array('te_is_control', 'te_hide_pdf') as $key) {
+			if (array_key_exists($key, $test)) {
+				$data[$key] = empty($test[$key]) ? 0 : 1;
+			}
+		}
 
 		if ($id) {
 			return $this->db->update('ci_test_panels', $data, array('te_ID' => $id, 'te_group_id' => (int) $group_id));

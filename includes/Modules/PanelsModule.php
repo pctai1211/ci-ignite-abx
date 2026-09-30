@@ -21,7 +21,7 @@ class PanelsModule implements Module
 		return array(
 			array(
 				'slug'         => 'ci-abx-panels',
-				'title'        => __('Panels', 'ci-ignite-abx'),
+				'title'        => __('Groups & Tests', 'ci-ignite-abx'),
 				'capability'   => Roles::CAP_PANELS,
 				'callback'     => array($page, 'render'),
 				'show_in_menu' => Roles::is_lab_user() && !Roles::is_admin(),
@@ -38,6 +38,7 @@ class PanelsModule implements Module
 		add_action('admin_post_ci_abx_delete_panel', array($page, 'handle_delete'));
 		add_action('admin_post_ci_abx_save_tests', array($page, 'handle_save_tests'));
 		add_action('admin_post_ci_abx_export_panels', array($page, 'handle_export'));
+		add_action('admin_post_ci_abx_export_panels_csv', array($page, 'handle_export_csv'));
 		add_action('admin_post_ci_abx_import_panels', array($page, 'handle_import'));
 	}
 }

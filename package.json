@@ -1,0 +1,12 @@
+{
+	"name": "ci-ignite-abx-admin-assets",
+	"private": true,
+	"scripts": {
+		"build": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.css -o assets/css/admin.css --minify",
+		"build:css": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.css -o assets/css/admin.css --minify",
+		"watch:css": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.css -o assets/css/admin.css --watch"
+	},
+	"devDependencies": {
+		"tailwindcss": "^3.4.17"
+	}
+}

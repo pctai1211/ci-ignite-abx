@@ -17,6 +17,18 @@ class PanelRepository extends Repository
 		);
 	}
 
+	public function children_for_lab($lab_id, $parent_id)
+	{
+		return $this->db->get_results(
+			$this->db->prepare(
+				'SELECT * FROM ci_test_groups WHERE tg_lab_ID = %d AND tg_parent = %d ORDER BY tg_position ASC, tg_name ASC',
+				$lab_id,
+				$parent_id
+			),
+			ARRAY_A
+		);
+	}
+
 	public function parents_for_lab($lab_id, $exclude_id = 0)
 	{
 		$sql = $this->db->prepare(
@@ -35,6 +47,26 @@ class PanelRepository extends Repository
 	{
 		$row = $this->db->get_row(
 			$this->db->prepare('SELECT * FROM ci_test_groups WHERE tg_ID = %d', $id),
+			ARRAY_A
+		);
+
+		if (!$row) {
+			return null;
+		}
+
+		$row['tg_other_options'] = self::decode_options($row['tg_other_options']);
+		return $row;
+	}
+
+	public function find_by_name($lab_id, $name, $parent_id = 0)
+	{
+		$row = $this->db->get_row(
+			$this->db->prepare(
+				'SELECT * FROM ci_test_groups WHERE tg_lab_ID = %d AND tg_parent = %d AND tg_name = %s LIMIT 1',
+				(int) $lab_id,
+				(int) $parent_id,
+				$name
+			),
 			ARRAY_A
 		);
 

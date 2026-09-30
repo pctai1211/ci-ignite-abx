@@ -140,7 +140,7 @@ class Shell
 			$args = Roles::is_admin() && $lab_id ? array('lab_id' => $lab_id) : array();
 			$items[] = array(
 				'slug'   => 'ci-abx-panels',
-				'label'  => __('Panels', 'ci-ignite-abx'),
+				'label'  => __('Groups & Tests', 'ci-ignite-abx'),
 				'url'    => View::url('ci-abx-panels', $args),
 				'active' => $page === 'ci-abx-panels',
 				'icon'   => 'panels',
@@ -169,12 +169,14 @@ class Shell
 			array('label' => __('Settings', 'ci-ignite-abx'), 'url' => ''),
 		);
 
-		if ($page === 'ci-abx-panels') {
-			$crumbs[] = array('label' => __('Test Panels', 'ci-ignite-abx'), 'url' => View::url('ci-abx-panels', Roles::is_admin() && !empty($_GET['lab_id']) ? array('lab_id' => absint($_GET['lab_id'])) : array()));
+		if ($page === 'ci-abx-profile') {
+			$crumbs[] = array('label' => __('Edit Profile', 'ci-ignite-abx'), 'url' => '');
+		} elseif ($page === 'ci-abx-panels') {
+			$crumbs[] = array('label' => __('Groups & Tests', 'ci-ignite-abx'), 'url' => View::url('ci-abx-panels', Roles::is_admin() && !empty($_GET['lab_id']) ? array('lab_id' => absint($_GET['lab_id'])) : array()));
 			if ($act === 'add') {
-				$crumbs[] = array('label' => __('Add New Panel', 'ci-ignite-abx'), 'url' => '');
+				$crumbs[] = array('label' => __('Add Group', 'ci-ignite-abx'), 'url' => '');
 			} elseif ($act === 'edit') {
-				$crumbs[] = array('label' => __('Edit Panel', 'ci-ignite-abx'), 'url' => '');
+				$crumbs[] = array('label' => __('Edit Group', 'ci-ignite-abx'), 'url' => '');
 			}
 		} else {
 			$crumbs[] = array('label' => __('Labs', 'ci-ignite-abx'), 'url' => View::url('ci-abx-labs'));

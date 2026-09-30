@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
 use CI\IgniteAbx\Security\Roles;
 use CI\IgniteAbx\Support\View;
 
-$lab               = isset($lab) ? $lab : array();
+$lab               = isset($lab) && is_array($lab) ? $lab : array();
 $mode              = isset($mode) ? $mode : 'create';
 $is_admin          = !empty($is_admin);
 $assignable_users  = isset($assignable_users) ? $assignable_users : array();
@@ -97,21 +97,21 @@ $logo              = !empty($lab['lab_logo']) ? $lab['lab_logo'] : '';
 	</section>
 
 	<?php if ($is_admin) : ?>
-	<section class="ci-card">
-		<h2><?php esc_html_e('Assign users', 'ci-ignite-abx'); ?></h2>
-		<p class="ci-muted"><?php esc_html_e('Administrators can attach Lab users to this laboratory. Assigned users receive the Lab role and can edit this lab and its panels.', 'ci-ignite-abx'); ?></p>
-		<label><?php esc_html_e('Lab users', 'ci-ignite-abx'); ?></label>
-		<select name="lab_users[]" multiple class="ci-multiselect">
-			<?php foreach ($assignable_users as $user) : ?>
-				<option value="<?php echo esc_attr($user->ID); ?>" <?php selected(in_array((int) $user->ID, $assigned_user_ids, true)); ?>>
-					<?php echo esc_html($user->display_name . ' (' . $user->user_login . ')'); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
-		<?php if (empty($assignable_users)) : ?>
-			<p class="ci-muted"><?php esc_html_e('No assignable users yet. Create a WordPress user that is not an administrator, then assign them here.', 'ci-ignite-abx'); ?></p>
-		<?php endif; ?>
-	</section>
+		<section class="ci-card">
+			<h2><?php esc_html_e('Assign users', 'ci-ignite-abx'); ?></h2>
+			<p class="ci-muted"><?php esc_html_e('Administrators can attach Lab users to this laboratory. Assigned users receive the Lab role and can edit this lab and its panels.', 'ci-ignite-abx'); ?></p>
+			<label><?php esc_html_e('Lab users', 'ci-ignite-abx'); ?></label>
+			<select name="lab_users[]" multiple class="ci-multiselect">
+				<?php foreach ($assignable_users as $user) : ?>
+					<option value="<?php echo esc_attr($user->ID); ?>" <?php selected(in_array((int) $user->ID, $assigned_user_ids, true)); ?>>
+						<?php echo esc_html($user->display_name . ' (' . $user->user_login . ')'); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<?php if (empty($assignable_users)) : ?>
+				<p class="ci-muted"><?php esc_html_e('No assignable users yet. Create a WordPress user that is not an administrator, then assign them here.', 'ci-ignite-abx'); ?></p>
+			<?php endif; ?>
+		</section>
 	<?php endif; ?>
 
 	<section class="ci-card">

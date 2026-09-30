@@ -20,25 +20,11 @@ class Assets
 		wp_enqueue_style('wp-color-picker');
 		wp_enqueue_script('wp-color-picker');
 
-		wp_enqueue_script(
-			'ci-abx-tailwind',
-			'https://cdn.tailwindcss.com',
-			array(),
-			null,
-			false
-		);
-
-		wp_add_inline_script(
-			'ci-abx-tailwind',
-			'tailwind.config = { important: ".ci-abx-app", corePlugins: { preflight: false }, theme: { extend: { colors: { ci: "#e85d04" } } } };',
-			'after'
-		);
-
 		wp_enqueue_style(
 			'ci-abx-admin',
 			CI_ABX_URL . 'assets/css/admin.css',
 			array(),
-			CI_ABX_VERSION
+			filemtime(CI_ABX_PATH . 'assets/css/admin.css')
 		);
 
 		wp_enqueue_script(

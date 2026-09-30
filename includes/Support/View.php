@@ -6,14 +6,14 @@ defined('ABSPATH') || exit;
 
 class View
 {
-	public static function render($template, array $data = array())
+	public static function render($template, array $vars = array())
 	{
 		$path = CI_ABX_PATH . 'views/' . ltrim($template, '/') . '.php';
 		if (!is_readable($path)) {
 			return;
 		}
 
-		extract($data, EXTR_SKIP);
+		extract($vars, EXTR_SKIP);
 		include $path;
 	}
 

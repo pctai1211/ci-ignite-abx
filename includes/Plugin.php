@@ -8,6 +8,7 @@ use CI\IgniteAbx\Admin\Shell;
 use CI\IgniteAbx\Modules\LabsModule;
 use CI\IgniteAbx\Modules\Module;
 use CI\IgniteAbx\Modules\PanelsModule;
+use CI\IgniteAbx\Modules\ProfileModule;
 use CI\IgniteAbx\Support\Flash;
 
 defined('ABSPATH') || exit;
@@ -33,6 +34,7 @@ class Plugin
 	{
 		$this->register_module(new LabsModule());
 		$this->register_module(new PanelsModule());
+		$this->register_module(new ProfileModule());
 
 		/**
 		 * Add extra modules (menus, tables, roles) from other plugins.

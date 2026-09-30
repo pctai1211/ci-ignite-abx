@@ -52,9 +52,92 @@
 		});
 	}
 
+	function initTestRows() {
+		var $rows = $('#ci-test-rows');
+		if (!$rows.length) {
+			return;
+		}
+
+		var nextIndex = $rows.find('tr:not(.ci-test-empty)').length;
+		$('#ci-add-test-row').on('click', function () {
+			$rows.find('.ci-test-empty').remove();
+			var prefix = 'tests[' + nextIndex + ']';
+			var $button = $(this);
+			var groupId = parseInt($button.attr('data-group-id'), 10) || 0;
+			var groupName = $('<div>').text($button.attr('data-group-name') || '').html();
+			var html = '<tr>' +
+				'<td><input type="hidden" name="' + prefix + '[te_ID]" value="0" /><input type="hidden" name="' + prefix + '[tg_group_id]" value="' + groupId + '" /><input type="text" name="' + prefix + '[te_name]" value="" /></td>' +
+				'<td>' + groupName + '</td>' +
+				'<td><input type="text" name="' + prefix + '[te_abrev]" value="" /></td>' +
+				'<td><input type="text" name="' + prefix + '[te_category]" value="" /></td>' +
+				'<td><input type="text" class="ci-ct" name="' + prefix + '[te_ct_vlow]" value="" /></td>' +
+				'<td><input type="text" class="ci-ct" name="' + prefix + '[te_ct_low]" value="" /></td>' +
+				'<td><input type="text" class="ci-ct" name="' + prefix + '[te_ct_normal]" value="" /></td>' +
+				'<td><input type="text" class="ci-ct" name="' + prefix + '[te_ct_high]" value="" /></td>' +
+				'<td><input type="text" class="ci-ct" name="' + prefix + '[te_ct_vhigh]" value="" /></td>' +
+				'<td><input type="hidden" name="' + prefix + '[te_enabled]" value="0" /><input type="checkbox" name="' + prefix + '[te_enabled]" value="1" checked aria-label="Enable test" /></td>' +
+				'</tr>';
+			$rows.append(html);
+			nextIndex++;
+			$rows.find('tr:last input[name$="[te_name]"]').trigger('focus');
+		});
+	}
+
+	function initUserMenu() {
+		var $menus = $('[data-user-menu]');
+
+		$menus.each(function () {
+			var $menu = $(this);
+			var $toggle = $menu.find('[data-user-menu-toggle]');
+			var $dropdown = $menu.find('.ci-abx-user-menu__dropdown');
+
+			function closeMenu(returnFocus) {
+				$dropdown.prop('hidden', true);
+				$toggle.attr('aria-expanded', 'false');
+				if (returnFocus) {
+					$toggle.trigger('focus');
+				}
+			}
+
+			$toggle.on('click', function () {
+				var open = $toggle.attr('aria-expanded') === 'true';
+				$dropdown.prop('hidden', open);
+				$toggle.attr('aria-expanded', open ? 'false' : 'true');
+				if (!open) {
+					$dropdown.find('[role="menuitem"]').first().trigger('focus');
+				}
+			});
+
+			$menu.on('keydown', function (e) {
+				var $items = $dropdown.find('[role="menuitem"]');
+				var index = $items.index(document.activeElement);
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					closeMenu(true);
+				} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+					e.preventDefault();
+					if ($toggle.attr('aria-expanded') !== 'true') {
+						$toggle.trigger('click');
+					} else {
+						index = e.key === 'ArrowDown' ? (index + 1) % $items.length : (index <= 0 ? $items.length - 1 : index - 1);
+						$items.eq(index).trigger('focus');
+					}
+				}
+			});
+
+			$(document).on('click.ciAbxUserMenu', function (e) {
+				if (!$menu.is(e.target) && !$menu.has(e.target).length) {
+					closeMenu(false);
+				}
+			});
+		});
+	}
+
 	$(function () {
 		initColor();
 		initMedia();
 		initTabs();
+		initTestRows();
+		initUserMenu();
 	});
 })(jQuery);
