@@ -31,15 +31,15 @@ $opt = static function ($options, $key, $default = '') {
 	<input type="hidden" name="lab_id" value="<?php echo esc_attr($lab_id); ?>" />
 	<input type="hidden" name="group[tg_ID]" value="<?php echo esc_attr($id); ?>" />
 	<?php if ($tab === 'tests') : ?><input type="hidden" name="return_tab" value="tests" /><?php endif; ?>
-
-	<div class="ci-form-actions-top">
-		<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-panels', $qs)); ?>"><?php esc_html_e('Cancel', 'ci-ignite-abx'); ?></a>
-		<button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save Group', 'ci-ignite-abx'); ?></button>
-	</div>
-
-	<div class="ci-tabs">
-		<button type="button" class="ci-tab <?php echo $tab !== 'tests' ? 'is-active' : ''; ?>" data-tab="settings"><?php esc_html_e('Group Settings', 'ci-ignite-abx'); ?></button>
-		<button type="button" class="ci-tab <?php echo $tab === 'tests' ? 'is-active' : ''; ?>" data-tab="tests"><?php esc_html_e('Tests', 'ci-ignite-abx'); ?></button>
+	<div class="tw-flex tw-justify-between tw-gap-5 tw-flex-wrap tw-items-center tw-mb-4">
+		<div class="ci-tabs">
+			<button type="button" class="ci-tab <?php echo $tab !== 'tests' ? 'is-active' : ''; ?>" data-tab="settings"><?php esc_html_e('Group Settings', 'ci-ignite-abx'); ?></button>
+			<button type="button" class="ci-tab <?php echo $tab === 'tests' ? 'is-active' : ''; ?>" data-tab="tests"><?php esc_html_e('Tests', 'ci-ignite-abx'); ?></button>
+		</div>
+		<div class="ci-form-actions-top">
+			<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-panels', $qs)); ?>"><?php esc_html_e('Cancel', 'ci-ignite-abx'); ?></a>
+			<button type="submit" class="ci-btn ci-btn-primary"><?php esc_html_e('Save Group', 'ci-ignite-abx'); ?></button>
+		</div>
 	</div>
 
 	<div class="ci-tab-panel" data-panel="settings" <?php echo $tab === 'tests' ? 'hidden' : ''; ?>>
@@ -271,27 +271,42 @@ $opt = static function ($options, $key, $default = '') {
 
 	<div class="ci-tab-panel" data-panel="tests" <?php echo $tab === 'tests' ? '' : 'hidden'; ?>>
 		<div class="ci-section-head">
-			<div><h2><?php esc_html_e('Tests in this group', 'ci-ignite-abx'); ?></h2><p class="ci-muted"><?php echo empty($group['tg_parent']) ? esc_html__('Includes tests from this parent group and its child groups. New tests are added to the parent group.', 'ci-ignite-abx') : esc_html__('Tests saved here belong to this group. Add a row to create a test.', 'ci-ignite-abx'); ?></p></div>
+			<div>
+				<h2 class="tw-my-0"><?php esc_html_e('Tests in this group', 'ci-ignite-abx'); ?></h2>
+				<p class="ci-muted"><?php echo empty($group['tg_parent']) ? esc_html__('Includes tests from this parent group and its child groups. New tests are added to the parent group.', 'ci-ignite-abx') : esc_html__('Tests saved here belong to this group. Add a row to create a test.', 'ci-ignite-abx'); ?></p>
+			</div>
 			<button type="button" class="ci-btn ci-btn-ghost" id="ci-add-test-row" data-group-id="<?php echo esc_attr($group['tg_ID']); ?>" data-group-name="<?php echo esc_attr($group['tg_name']); ?>"><?php esc_html_e('+ Add Test', 'ci-ignite-abx'); ?></button>
 		</div>
 		<div class="ci-card tw-overflow-x-auto">
 			<table class="ci-table ci-test-table">
-				<thead><tr>
-					<th><?php esc_html_e('Test Name', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Group', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Abbreviation', 'ci-ignite-abx'); ?></th><th><?php esc_html_e('Category', 'ci-ignite-abx'); ?></th>
-					<th>V.Low</th><th>Low</th><th>Normal</th><th>High</th><th>V.High</th><th><?php esc_html_e('Enabled', 'ci-ignite-abx'); ?></th>
-				</tr></thead>
-				<tbody id="ci-test-rows">
-				<?php foreach ($tests as $i => $test) : ?>
+				<thead>
 					<tr>
-						<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_ID]" value="<?php echo esc_attr($test['te_ID']); ?>" /><input type="hidden" name="tests[<?php echo (int) $i; ?>][tg_group_id]" value="<?php echo esc_attr($test['tg_group_id']); ?>" /><input type="text" name="tests[<?php echo (int) $i; ?>][te_name]" value="<?php echo esc_attr($test['te_name']); ?>" /></td>
-						<td><?php echo esc_html($test['tg_group_name']); ?></td>
-						<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_abrev]" value="<?php echo esc_attr($test['te_abrev']); ?>" /></td>
-						<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_category]" value="<?php echo esc_attr($test['te_category']); ?>" /></td>
-						<?php foreach (array('vlow', 'low', 'normal', 'high', 'vhigh') as $band) : ?><td><input type="text" class="ci-ct" name="tests[<?php echo (int) $i; ?>][te_ct_<?php echo esc_attr($band); ?>]" value="<?php echo esc_attr($test['te_ct_' . $band]); ?>" /></td><?php endforeach; ?>
-						<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="0" /><input type="checkbox" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="1" <?php checked(!empty($test['te_enabled'])); ?> aria-label="<?php esc_attr_e('Enable test', 'ci-ignite-abx'); ?>" /></td>
+						<th><?php esc_html_e('Test Name', 'ci-ignite-abx'); ?></th>
+						<th><?php esc_html_e('Group', 'ci-ignite-abx'); ?></th>
+						<th><?php esc_html_e('Abbreviation', 'ci-ignite-abx'); ?></th>
+						<th><?php esc_html_e('Category', 'ci-ignite-abx'); ?></th>
+						<th>V.Low</th>
+						<th>Low</th>
+						<th>Normal</th>
+						<th>High</th>
+						<th>V.High</th>
+						<th><?php esc_html_e('Enabled', 'ci-ignite-abx'); ?></th>
 					</tr>
-				<?php endforeach; ?>
-				<?php if (empty($tests)) : ?><tr class="ci-test-empty"><td colspan="10" class="ci-empty"><?php esc_html_e('This group has no tests yet.', 'ci-ignite-abx'); ?></td></tr><?php endif; ?>
+				</thead>
+				<tbody id="ci-test-rows">
+					<?php foreach ($tests as $i => $test) : ?>
+						<tr>
+							<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_ID]" value="<?php echo esc_attr($test['te_ID']); ?>" /><input type="hidden" name="tests[<?php echo (int) $i; ?>][tg_group_id]" value="<?php echo esc_attr($test['tg_group_id']); ?>" /><input type="text" name="tests[<?php echo (int) $i; ?>][te_name]" value="<?php echo esc_attr($test['te_name']); ?>" /></td>
+							<td><?php echo esc_html($test['tg_group_name']); ?></td>
+							<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_abrev]" value="<?php echo esc_attr($test['te_abrev']); ?>" /></td>
+							<td><input type="text" name="tests[<?php echo (int) $i; ?>][te_category]" value="<?php echo esc_attr($test['te_category']); ?>" /></td>
+							<?php foreach (array('vlow', 'low', 'normal', 'high', 'vhigh') as $band) : ?><td><input type="text" class="ci-ct" name="tests[<?php echo (int) $i; ?>][te_ct_<?php echo esc_attr($band); ?>]" value="<?php echo esc_attr($test['te_ct_' . $band]); ?>" /></td><?php endforeach; ?>
+							<td><input type="hidden" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="0" /><input type="checkbox" name="tests[<?php echo (int) $i; ?>][te_enabled]" value="1" <?php checked(!empty($test['te_enabled'])); ?> aria-label="<?php esc_attr_e('Enable test', 'ci-ignite-abx'); ?>" /></td>
+						</tr>
+					<?php endforeach; ?>
+					<?php if (empty($tests)) : ?><tr class="ci-test-empty">
+							<td colspan="10" class="ci-empty"><?php esc_html_e('This group has no tests yet.', 'ci-ignite-abx'); ?></td>
+						</tr><?php endif; ?>
 				</tbody>
 			</table>
 		</div>

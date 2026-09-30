@@ -17,21 +17,22 @@ $logo              = !empty($lab['lab_logo']) ? $lab['lab_logo'] : '';
 	<?php wp_nonce_field('ci_abx_save_lab', 'ci_abx_nonce'); ?>
 	<input type="hidden" name="action" value="ci_abx_save_lab" />
 	<input type="hidden" name="lab[lab_ID]" value="<?php echo esc_attr($lab['lab_ID'] ?? 0); ?>" />
+	<div class="tw-flex tw-justify-between tw-gap-5 tw-flex-wrap tw-items-center tw-mb-4">
+		<div class="ci-pill-row">
+			<span class="ci-pill ci-pill-active"><?php esc_html_e('Labs', 'ci-ignite-abx'); ?></span>
+		</div>
 
-	<div class="ci-form-actions-top">
-		<?php if ($is_admin) : ?>
-			<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-labs')); ?>"><?php esc_html_e('Back to list', 'ci-ignite-abx'); ?></a>
-		<?php endif; ?>
-		<?php if (!empty($lab['lab_ID'])) : ?>
-			<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-panels', Roles::is_admin() ? array('lab_id' => $lab['lab_ID']) : array())); ?>">
-				<?php esc_html_e('Panels', 'ci-ignite-abx'); ?>
-			</a>
-		<?php endif; ?>
-		<button type="submit" class="ci-btn ci-btn-primary"><?php echo $mode === 'create' ? esc_html__('Create Lab', 'ci-ignite-abx') : esc_html__('Save Lab', 'ci-ignite-abx'); ?></button>
-	</div>
-
-	<div class="ci-pill-row">
-		<span class="ci-pill ci-pill-active"><?php esc_html_e('Labs', 'ci-ignite-abx'); ?></span>
+		<div class="ci-form-actions-top">
+			<?php if ($is_admin) : ?>
+				<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-labs')); ?>"><?php esc_html_e('Back to list', 'ci-ignite-abx'); ?></a>
+			<?php endif; ?>
+			<?php if (!empty($lab['lab_ID'])) : ?>
+				<a class="ci-btn ci-btn-ghost" href="<?php echo esc_url(View::url('ci-abx-panels', Roles::is_admin() ? array('lab_id' => $lab['lab_ID']) : array())); ?>">
+					<?php esc_html_e('Panels', 'ci-ignite-abx'); ?>
+				</a>
+			<?php endif; ?>
+			<button type="submit" class="ci-btn ci-btn-primary"><?php echo $mode === 'create' ? esc_html__('Create Lab', 'ci-ignite-abx') : esc_html__('Save Lab', 'ci-ignite-abx'); ?></button>
+		</div>
 	</div>
 
 	<section class="ci-card">
